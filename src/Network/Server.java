@@ -27,10 +27,10 @@ public class Server {
 				oos = new ObjectOutputStream(socket.getOutputStream());
 				
 				Request request = (Request)ois.readObject();
-				Object[] messages = request.getMessages();
 				
-				if((RequestCode)messages[0] == RequestCode.CONNECT){
-					System.out.println("New connection");
+				if(request.getCode() == RequestCode.CONNECT){
+					oos.writeObject(request.getName() + "Has connected");
+				}else if(request.getCode() == RequestCode.SEND_MESSAGE){
 				}
 				
 			}

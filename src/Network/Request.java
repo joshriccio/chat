@@ -1,17 +1,35 @@
 package Network;
 
-public class Request {
+import java.io.Serializable;
+
+public class Request implements Serializable{
 	
-	private Object[] messages;
+	private static final long serialVersionUID = -4927401626139503305L;
+	private RequestCode code;
+	private String name;
+	private String message;
 	
 	public Request(RequestCode code, String name){
-		this.messages = new String[2];
-		this.messages[0] = code;
-		this.messages[1] = name;
+		this.code = code;
+		this.name = name;
 	}
 	
-	public Object[] getMessages(){
-		return this.messages;
+	public Request(RequestCode code, String name, String message){
+		this.code = code;
+		this.name = name;
+		this.message = message;
+	}
+	
+	public RequestCode getCode(){
+		return this.code;
+	}
+	
+	public String getName(){
+		return this.name;
+	}
+	
+	public String getMessage(){
+		return this.message;
 	}
 
 }

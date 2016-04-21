@@ -1,7 +1,7 @@
 package Network;
 
 public enum RequestCode {
-	CONNECT(1);
+	CONNECT(0), SEND_MESSAGE(1);
 
 	RequestCode(int requestCode) {
 	}
