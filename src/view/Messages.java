@@ -18,7 +18,7 @@ public class Messages extends JPanel{
 		this.messages = new JTextPane();
 		this.messages.setEditable(false);
 		this.messages.setBackground(Color.white);
-		this.messages.setPreferredSize(new Dimension(580, 300));
+		this.messages.setPreferredSize(new Dimension(560, 250));
 		this.scrollpane = new JScrollPane(this.messages, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		this.add(this.scrollpane, BorderLayout.CENTER);

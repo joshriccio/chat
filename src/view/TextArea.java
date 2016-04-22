@@ -17,7 +17,7 @@ public class TextArea extends JPanel{
 		this.chat = chat;
 		this.chat.setEditable(true);
 		this.chat.setBackground(Color.white);
-		this.chat.setPreferredSize(new Dimension(580, 100));
+		this.chat.setPreferredSize(new Dimension(560, 100));
 		this.scrollpane = new JScrollPane(this.chat, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		this.add(this.scrollpane, BorderLayout.CENTER);

@@ -18,9 +18,9 @@ import Network.Server;
 
 public class ChatWindow extends JFrame{
 	private static final long serialVersionUID = 5875046651800072284L;
-	private static Socket socket;
-	private static ObjectOutputStream oos;
-	private static ObjectInputStream ois;
+	private Socket socket;
+	private ObjectOutputStream oos;
+	private ObjectInputStream ois;
 	private Messages messages;
 	private TextArea textarea;
 	private JTextPane textpane;
