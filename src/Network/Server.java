@@ -29,8 +29,7 @@ public class Server {
 				Request request = (Request)ois.readObject();
 				
 				if(request.getCode() == RequestCode.CONNECT){
-					oos.writeObject(request.getName() + "Has connected");
-				}else if(request.getCode() == RequestCode.SEND_MESSAGE){
+					oos.writeObject(request.getName() + " has connected");
 				}
 				
 			}

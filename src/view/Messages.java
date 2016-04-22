@@ -19,7 +19,7 @@ public class Messages extends JPanel{
 		this.messages.setPreferredSize(new Dimension(580, 300));
 		this.add(this.messages, BorderLayout.CENTER);
 		
-		this.messages.setText("What is your name?");
+		this.messages.setText("What is your name? (Use ctrl+enter to send)");
 	}
 	
 	public void setText(String text){
