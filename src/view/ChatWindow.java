@@ -38,7 +38,6 @@ public class ChatWindow extends JFrame{
 		this.textarea = new TextArea(textpane);
 		this.add(messages, BorderLayout.CENTER);
 		this.add(textarea, BorderLayout.SOUTH);
-
 	}
 
 	private void connectToServer(String name) {
