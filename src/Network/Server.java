@@ -39,7 +39,7 @@ public class Server {
 						oos.writeObject(response);
 						usersmap.put(request.getName(), oos);
 						userslist.addElement(request.getName());
-						ClientHandler clienthandler = new ClientHandler(oos, ois, request);
+						ClientHandler clienthandler = new ClientHandler(ois, request);
 						clienthandler.start();
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -55,13 +55,11 @@ public class Server {
 }
 
 class ClientHandler extends Thread{
-	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
 	private String name;
 	private boolean isRunning;
 	
-	public ClientHandler(ObjectOutputStream oos, ObjectInputStream ois, Request request){
-		this.oos = oos;
+	public ClientHandler(ObjectInputStream ois, Request request){
 		this.ois = ois;
 		this.name = request.getName();
 		this.isRunning = true;
