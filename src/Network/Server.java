@@ -34,12 +34,13 @@ public class Server {
 				Request request = (Request)ois.readObject();
 	
 				if(request.getCode() == RequestCode.CONNECT){
-					ClientHandler clienthandler = new ClientHandler(oos, ois, request);
-					clienthandler.start();
 					try {
-						oos.writeObject(request.getMessage() + " has connected");
-						usersmap.put(request.getMessage(), oos);
-						userslist.addElement(request.getMessage());
+						Response response = new Response(ResponseCode.SUCCESS, null, null);
+						oos.writeObject(response);
+						usersmap.put(request.getName(), oos);
+						userslist.addElement(request.getName());
+						ClientHandler clienthandler = new ClientHandler(oos, ois, request);
+						clienthandler.start();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -62,7 +63,7 @@ class ClientHandler extends Thread{
 	public ClientHandler(ObjectOutputStream oos, ObjectInputStream ois, Request request){
 		this.oos = oos;
 		this.ois = ois;
-		this.name = request.getMessage();
+		this.name = request.getName();
 		this.isRunning = true;
 	}
 	
@@ -82,7 +83,7 @@ class ClientHandler extends Thread{
 	}
 
 	private void sendMessageToClients(String message) {
-		Response response = new Response(ResponseCode.NEW_MESSAGE, name, message);
+		Response response = new Response(ResponseCode.NEW_MESSAGE, this.name, message);
 		for(String user : Server.userslist){
 			try {
 				Server.usersmap.get(user).writeObject(response);

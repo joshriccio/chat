@@ -12,6 +12,8 @@ import javax.swing.JTextPane;
 
 import Network.Request;
 import Network.RequestCode;
+import Network.Response;
+import Network.ResponseCode;
 import Network.Server;
 
 public class ChatWindow extends JFrame{
@@ -40,16 +42,19 @@ public class ChatWindow extends JFrame{
 		this.add(textarea, BorderLayout.SOUTH);
 	}
 
-	private void connectToServer(String name) {
-		Request request = new Request(RequestCode.CONNECT, name);
+	private void connectToServer() {
+		this.name = textarea.getMessage();
+		Request request = new Request(RequestCode.CONNECT, this.name);
 		try {
 			socket = new Socket(Server.ADDRESS, Server.PORT_NUMBER);
 			oos = new ObjectOutputStream(socket.getOutputStream());
 			ois = new ObjectInputStream(socket.getInputStream());
 			oos.writeObject(request);
-			this.conversation = "";
-			this.conversation = this.conversation + (String)ois.readObject() + "\n";
-			this.messages.setText(this.conversation);
+			Response response = (Response)ois.readObject();
+			if(response.getCode() == ResponseCode.SUCCESS){
+				ServerListener serverlistener = new ServerListener();
+				serverlistener.start();
+			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -63,10 +68,17 @@ public class ChatWindow extends JFrame{
 			public void keyPressed(KeyEvent event) {
 				if(event.isControlDown() && event.getKeyCode() == KeyEvent.VK_ENTER){
 					if(firstmessage){
-						name = textarea.getMessage();
-						connectToServer(name);
+						connectToServer();
 						textarea.clearText();
 						firstmessage = false;
+					}else{
+						Request request = new Request(RequestCode.SEND_MESSAGE, name, textarea.getMessage());
+						textarea.clearText();
+						try {
+							oos.writeObject(request);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
@@ -79,5 +91,28 @@ public class ChatWindow extends JFrame{
 			public void keyTyped(KeyEvent event) {
 			}
 		});
+	}
+	
+private class ServerListener extends Thread{
+		private boolean isRunning = true;
+		
+		@Override
+		public void run(){
+			conversation = name + " has connected \n";
+			messages.setText(conversation);
+			
+			while(isRunning){
+				Response response;
+				try {
+					response = (Response) ois.readObject();
+					if (response.getCode() == ResponseCode.NEW_MESSAGE) {
+						conversation = conversation + response.getName() + ": " + response.getMessage() + "\n";
+						messages.setText(conversation);
+					}
+				} catch (ClassNotFoundException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

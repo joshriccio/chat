@@ -1,9 +1,41 @@
 package Network;
 
-public class Response {
+import java.io.Serializable;
 
-	public Response(ResponseCode newMessage, String name, String message) {
-		
+public class Response implements Serializable{
+
+	private static final long serialVersionUID = 7044358694627183903L;
+	private String name;
+	private String message;
+	private ResponseCode code;
+	
+	public Response(ResponseCode code, String name, String message) {
+		this.setName(name);
+		this.setMessage(message);
+		this.setCode(code);
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public ResponseCode getCode() {
+		return code;
+	}
+
+	public void setCode(ResponseCode code) {
+		this.code = code;
+	}
 }
