@@ -67,6 +67,7 @@ class ClientHandler extends Thread{
 	
 	@Override
 	public void run(){
+		initialConnection();
 		while(isRunning){
 			try {
 				Request request = (Request)ois.readObject();
@@ -77,6 +78,17 @@ class ClientHandler extends Thread{
 				}
 				
 			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void initialConnection() {
+		Response response = new Response(ResponseCode.NEW_MESSAGE, this.name, "I have joined the chat.");
+		for(String user : Server.userslist){
+			try {
+				Server.usersmap.get(user).writeObject(response);
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
