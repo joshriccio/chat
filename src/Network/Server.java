@@ -74,9 +74,24 @@ class ClientHandler extends Thread{
 				Request request = (Request)ois.readObject();
 				if(request.getCode() == RequestCode.SEND_MESSAGE){
 					sendMessageToClients(request.getMessage());
+				}else if(request.getCode() == RequestCode.EXITING){
+					closeConnection();
 				}
 				
 			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void closeConnection() {
+		Server.userslist.remove(this.name);
+		this.isRunning = false;
+		Response response = new Response(ResponseCode.USER_DISCONNECTED, this.name);
+		for(String user : Server.userslist){
+			try {
+				Server.usersmap.get(user).writeObject(response);
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}

@@ -2,6 +2,8 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -91,6 +93,42 @@ public class ChatWindow extends JFrame{
 			public void keyTyped(KeyEvent event) {
 			}
 		});
+		this.addWindowListener(new WindowListener(){
+
+			@Override
+			public void windowActivated(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowClosed(WindowEvent arg0) {	
+			}
+
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				Request request = new Request(RequestCode.EXITING);
+				try {
+					oos.writeObject(request);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent arg0) {			
+			}
+
+			@Override
+			public void windowIconified(WindowEvent arg0) {	
+			}
+
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+			}
+		});
 	}
 	
 private class ServerListener extends Thread{
@@ -107,6 +145,9 @@ private class ServerListener extends Thread{
 					response = (Response) ois.readObject();
 					if (response.getCode() == ResponseCode.NEW_MESSAGE) {
 						conversation = conversation + response.getName() + ": " + response.getMessage() + "\n";
+						messages.setText(conversation);
+					}else if (response.getCode() == ResponseCode.USER_DISCONNECTED) {
+						conversation = conversation + response.getName() + " has disconnected." + "\n";
 						messages.setText(conversation);
 					}
 				} catch (ClassNotFoundException | IOException e) {

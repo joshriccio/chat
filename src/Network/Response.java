@@ -15,6 +15,11 @@ public class Response implements Serializable{
 		this.setCode(code);
 	}
 
+	public Response(ResponseCode userDisconnected, String name) {
+		this.code = userDisconnected;
+		this.name = name;
+	}
+
 	public String getName() {
 		return name;
 	}

@@ -20,6 +20,10 @@ public class Request implements Serializable{
 		this.message = message;
 	}
 	
+	public Request(RequestCode exiting) {
+		this.code = exiting;
+	}
+
 	public RequestCode getCode(){
 		return this.code;
 	}
