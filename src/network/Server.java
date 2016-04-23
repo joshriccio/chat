@@ -30,6 +30,7 @@ public class Server {
 	 *            arguments are not used.
 	 */
 	public static void main(String[] args) {
+		System.out.println("Server: server initialized");
 		usersmap = new HashMap<>();
 		userslist = new Vector<String>();
 		boolean isRunning = true;
@@ -111,6 +112,7 @@ class ClientHandler extends Thread {
 	}
 
 	private void initialConnection() {
+		System.out.println("Server: " + this.name + " has connected");
 		Response response = new Response(ResponseCode.NEW_MESSAGE, this.name, "I have joined the chat.");
 		for (String user : Server.userslist) {
 			try {
@@ -122,6 +124,7 @@ class ClientHandler extends Thread {
 	}
 
 	private void closeConnection() {
+		System.out.println("Server: " + this.name + " has disconnected");
 		Server.userslist.remove(this.name);
 		this.isRunning = false;
 		Response response = new Response(ResponseCode.USER_DISCONNECTED, this.name);
