@@ -22,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -77,7 +78,7 @@ public class SideBar extends JFrame {
 		JLabel passlabel = new JLabel("Password");
 		this.add(passlabel);
 
-		JTextField passfield = new JTextField();
+		JPasswordField passfield = new JPasswordField();
 		passfield.setPreferredSize(new Dimension(200, 25));
 		this.add(passfield);
 
@@ -110,7 +111,7 @@ public class SideBar extends JFrame {
 				SideBar.this.remove(passlabel);
 				SideBar.this.remove(passfield);
 				SideBar.this.remove(newaccount);
-				if(connectToServer(usernamefield.getText(), passfield.getText())){
+				if(connectToServer(usernamefield.getText(), String.valueOf(passfield.getPassword()))){
 					setupWindow(usernamefield.getText());
 					setupChatService();
 				}else {
@@ -129,7 +130,7 @@ public class SideBar extends JFrame {
 				JLabel confirmpass = new JLabel("Confirm Password");
 				SideBar.this.add(confirmpass);
 
-				JTextField confirmpassfield = new JTextField();
+				JPasswordField confirmpassfield = new JPasswordField();
 				confirmpassfield.setPreferredSize(new Dimension(200, 25));
 				SideBar.this.add(confirmpassfield);
 
@@ -147,7 +148,7 @@ public class SideBar extends JFrame {
 				create.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
-						if(generateNewAccount(new User(usernamefield.getText(), confirmpassfield.getText()))){
+						if(generateNewAccount(new User(usernamefield.getText(), String.valueOf(confirmpassfield.getPassword())))){
 							JOptionPane.showMessageDialog(null, "Account Created");
 							SideBar.this.remove(confirmpass);
 							SideBar.this.remove(confirmpassfield);
