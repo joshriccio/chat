@@ -1,6 +1,7 @@
 package network;
 
 import java.io.Serializable;
+import java.util.Vector;
 
 /**
  * Response utilizes the command design pattern to wrap meta-data into a
@@ -15,6 +16,7 @@ public class Response implements Serializable {
 	private String name;
 	private String message;
 	private ResponseCode code;
+	private Vector<String> userslist;
 
 	/**
 	 * Constructor to create a response with a code, and a users name, and a
@@ -69,5 +71,24 @@ public class Response implements Serializable {
 	 */
 	public ResponseCode getCode() {
 		return code;
+	}
+
+	/**
+	 * Sets the list of users
+	 * 
+	 * @param userslist
+	 *            the list of users online
+	 */
+	public void addUserList(Vector<String> userslist) {
+		this.userslist = userslist;
+	}
+
+	/**
+	 * Returns the user list from this response
+	 * 
+	 * @return the user list from this response
+	 */
+	public Vector<String> getUserList() {
+		return this.userslist;
 	}
 }

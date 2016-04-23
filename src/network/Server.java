@@ -101,6 +101,8 @@ class ClientHandler extends Thread {
 				Request request = (Request) ois.readObject();
 				if (request.getCode() == RequestCode.SEND_MESSAGE) {
 					sendMessageToClients(request.getMessage());
+				} else if (request.getCode() == RequestCode.REQUEST_USERS_ONLINE) {
+					sendUsersList();
 				} else if (request.getCode() == RequestCode.EXITING) {
 					closeConnection();
 				}
@@ -109,6 +111,17 @@ class ClientHandler extends Thread {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void sendUsersList() {
+		Response response = new Response(ResponseCode.USERS_LIST_SENT, this.name);
+		response.addUserList(Server.userslist);
+		try {
+			Server.usersmap.get(this.name).writeObject(response);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	private void initialConnection() {
