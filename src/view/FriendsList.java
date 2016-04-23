@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
@@ -17,8 +19,11 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import network.Request;
 import network.RequestCode;
@@ -31,7 +36,7 @@ import network.Server;
  * @author Joshua Riccio
  *
  */
-public class FriendsList extends JFrame{
+public class FriendsList extends JFrame {
 
 	private static final long serialVersionUID = -2585106853637231791L;
 	private Socket socket;
@@ -40,14 +45,13 @@ public class FriendsList extends JFrame{
 	private DefaultListModel<String> listmodel;
 	private JList<String> list;
 	private JScrollPane scrollpane;
-	
 	private ChatWindow chatwindow;
 	private String username;
-	
+
 	/**
 	 * Constructor for FriendsList
 	 */
-	public FriendsList(){
+	public FriendsList() {
 		setupLogin();
 	}
 
@@ -57,24 +61,24 @@ public class FriendsList extends JFrame{
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLayout(new FlowLayout());
-		
+
 		JTextField usernamefield = new JTextField();
 		usernamefield.setPreferredSize(new Dimension(200, 25));
 		this.add(usernamefield);
-		
+
 		JButton loginbtn = new JButton("Connect");
 		this.add(loginbtn);
-		loginbtn.addActionListener(new ActionListener(){
+		loginbtn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				FriendsList.this.remove(usernamefield);
 				FriendsList.this.remove(loginbtn);
 				setupWindow(usernamefield.getText());
-				setupChatService();
 				connectToServer();
+				setupChatService();
 			}
-			
+
 		});
 	}
 
@@ -107,9 +111,7 @@ public class FriendsList extends JFrame{
 		this.setSize(300, 700);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
 		this.username = username;
-		
 		this.listmodel = new DefaultListModel<String>();
 		this.list = new JList<String>(listmodel);
 		this.scrollpane = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -117,7 +119,7 @@ public class FriendsList extends JFrame{
 		scrollpane.setPreferredSize(new Dimension(200, 600));
 		setLayout(new BorderLayout());
 		this.add(scrollpane, BorderLayout.CENTER);
-		
+		addMenus();
 		this.addWindowListener(new WindowListener() {
 
 			@Override
@@ -155,7 +157,50 @@ public class FriendsList extends JFrame{
 			}
 		});
 	}
-	
+
+	private void addMenus() {
+		JPopupMenu menu = new JPopupMenu();
+		JMenuItem messageItem = new JMenuItem("Send message");
+		menu.add(messageItem);
+		messageItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				chatwindow.setVisible(true);
+			}
+
+		});
+
+		this.list.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (SwingUtilities.isRightMouseButton(e)) {
+					menu.show(e.getComponent(), e.getX(), e.getY());
+				}
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+			}
+
+		});
+
+	}
+
 	private class ServerListener extends Thread {
 		private boolean isRunning = true;
 
@@ -167,9 +212,9 @@ public class FriendsList extends JFrame{
 					response = (Response) ois.readObject();
 					if (response.getCode() == ResponseCode.USERS_LIST_SENT) {
 						processUpdateUserList(response);
-					}else if (response.getCode() == ResponseCode.NEW_USER_CONNECTED) {
+					} else if (response.getCode() == ResponseCode.NEW_USER_CONNECTED) {
 						processNewUserConnected(response);
-					}else if (response.getCode() == ResponseCode.NEW_MESSAGE) {
+					} else if (response.getCode() == ResponseCode.NEW_MESSAGE) {
 						processNewMessageRecieved(response);
 					} else if (response.getCode() == ResponseCode.USER_DISCONNECTED) {
 						processUserDisconnected(response);
@@ -183,12 +228,12 @@ public class FriendsList extends JFrame{
 
 		private void processUserDisconnected(Response response) {
 			chatwindow.updateConversation(response.getName(), " has disconnected.");
-			if(FriendsList.this.listmodel.contains(response.getName()))
+			if (FriendsList.this.listmodel.contains(response.getName()))
 				FriendsList.this.listmodel.removeElement(response.getName());
 		}
 
 		private void processNewMessageRecieved(Response response) {
-			if(!chatwindow.isVisible())
+			if (!chatwindow.isVisible())
 				chatwindow.setVisible(true);
 			chatwindow.updateConversation(response.getName(), ": " + response.getMessage());
 		}
@@ -199,8 +244,8 @@ public class FriendsList extends JFrame{
 
 		private void processUpdateUserList(Response response) {
 			Vector<String> users = response.getUserList();
-			for(String user : users){
-				if(!FriendsList.this.listmodel.contains(user))
+			for (String user : users) {
+				if (!FriendsList.this.listmodel.contains(user))
 					FriendsList.this.listmodel.addElement(user);
 			}
 		}

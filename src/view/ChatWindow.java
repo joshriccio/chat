@@ -28,9 +28,10 @@ public class ChatWindow extends JFrame {
 
 	/**
 	 * The chat window's constructor
-	 * @param username 
-	 * @param conversation 
-	 * @param messages 
+	 * 
+	 * @param username
+	 * @param conversation
+	 * @param messages
 	 */
 	public ChatWindow(String username, ObjectOutputStream oos) {
 		this.setTitle("Chat");
@@ -49,7 +50,6 @@ public class ChatWindow extends JFrame {
 
 	private void setListeners() {
 		this.textpane.addKeyListener(new KeyListener() {
-			private boolean firstmessage = true;
 
 			@Override
 			public void keyPressed(KeyEvent event) {
@@ -58,21 +58,16 @@ public class ChatWindow extends JFrame {
 			@Override
 			public void keyReleased(KeyEvent event) {
 				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-					if (firstmessage) {
-						textarea.clearText();
-						firstmessage = false;
-					} else {
-						String message = "";
-						if (textarea.getMessage().length() > 1) {
-							message = textarea.getMessage().substring(0, textarea.getMessage().length() - 2);
-						}
-						Request request = new Request(RequestCode.SEND_MESSAGE, name, message);
-						textarea.clearText();
-						try {
-							oos.writeObject(request);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+					String message = "";
+					if (textarea.getMessage().length() > 1) {
+						message = textarea.getMessage().substring(0, textarea.getMessage().length() - 2);
+					}
+					Request request = new Request(RequestCode.SEND_MESSAGE, name, message);
+					textarea.clearText();
+					try {
+						oos.writeObject(request);
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
 				}
 			}
@@ -82,8 +77,8 @@ public class ChatWindow extends JFrame {
 			}
 		});
 	}
-	
-	public void updateConversation(String name, String message){
+
+	public void updateConversation(String name, String message) {
 		conversation = conversation + name + message + "\n";
 		messages.setText(conversation);
 	}

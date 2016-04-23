@@ -34,7 +34,6 @@ public class Messages extends JPanel {
 		this.add(this.scrollpane, BorderLayout.CENTER);		
 		DefaultCaret caret = (DefaultCaret)messages.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		this.messages.setText("What is your name?");
 	}
 
 	/**
