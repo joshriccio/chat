@@ -126,7 +126,7 @@ class ClientHandler extends Thread {
 
 	private void initialConnection() {
 		System.out.println("Server: " + this.name + " has connected");
-		Response response = new Response(ResponseCode.NEW_MESSAGE, this.name, " Now connected.");
+		Response response = new Response(ResponseCode.NEW_USER_CONNECTED, this.name);
 		for (String user : Server.userslist) {
 			try {
 				Server.usersmap.get(user).writeObject(response);

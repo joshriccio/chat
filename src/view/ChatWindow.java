@@ -3,21 +3,13 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
-
 import javax.swing.JFrame;
 import javax.swing.JTextPane;
 
 import network.Request;
 import network.RequestCode;
-import network.Response;
-import network.ResponseCode;
-import network.Server;
 
 /**
  * The main user interface for the chat client
@@ -27,28 +19,27 @@ import network.Server;
  */
 public class ChatWindow extends JFrame {
 	private static final long serialVersionUID = 5875046651800072284L;
-	private Socket socket;
 	private ObjectOutputStream oos;
-	private ObjectInputStream ois;
 	private Messages messages;
 	private TextArea textarea;
 	private JTextPane textpane;
-	private String name;
 	private String conversation;
+	private String name;
 
 	/**
 	 * The chat window's constructor
+	 * @param username 
 	 * @param conversation 
 	 * @param messages 
 	 */
-	public ChatWindow(Messages messages, String conversation) {
+	public ChatWindow(String username, ObjectOutputStream oos) {
 		this.setTitle("Chat");
 		this.setSize(600, 400);
 		this.setResizable(false);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		this.messages = messages;
-		this.conversation = conversation;
+		this.oos = oos;
+		this.messages = new Messages();
+		this.conversation = new String();
+		this.name = username;
 		this.textpane = new JTextPane();
 		setListeners();
 		this.textarea = new TextArea(textpane);
@@ -90,41 +81,10 @@ public class ChatWindow extends JFrame {
 			public void keyTyped(KeyEvent event) {
 			}
 		});
-		this.addWindowListener(new WindowListener() {
-
-			@Override
-			public void windowActivated(WindowEvent arg0) {
-			}
-
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-			}
-
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				Request request = new Request(RequestCode.EXITING);
-				try {
-					oos.writeObject(request);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {
-			}
-
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-			}
-
-			@Override
-			public void windowIconified(WindowEvent arg0) {
-			}
-
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-			}
-		});
+	}
+	
+	public void updateConversation(String name, String message){
+		conversation = conversation + name + message + "\n";
+		messages.setText(conversation);
 	}
 }

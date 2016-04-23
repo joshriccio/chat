@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -40,8 +42,6 @@ public class FriendsList extends JFrame{
 	private JScrollPane scrollpane;
 	
 	private ChatWindow chatwindow;
-	private String conversation;
-	private Messages messages;
 	private String username;
 	
 	/**
@@ -79,9 +79,7 @@ public class FriendsList extends JFrame{
 	}
 
 	private void setupChatService() {
-		this.messages = new Messages();
-		this.conversation = new String();
-		this.chatwindow = new ChatWindow(this.messages, this.conversation);
+		this.chatwindow = new ChatWindow(this.username, this.oos);
 	}
 
 	private void connectToServer() {
@@ -119,6 +117,43 @@ public class FriendsList extends JFrame{
 		scrollpane.setPreferredSize(new Dimension(200, 600));
 		setLayout(new BorderLayout());
 		this.add(scrollpane, BorderLayout.CENTER);
+		
+		this.addWindowListener(new WindowListener() {
+
+			@Override
+			public void windowActivated(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				Request request = new Request(RequestCode.EXITING);
+				try {
+					oos.writeObject(request);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowIconified(WindowEvent arg0) {
+			}
+
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+			}
+		});
 	}
 	
 	private class ServerListener extends Thread {
@@ -126,28 +161,47 @@ public class FriendsList extends JFrame{
 
 		@Override
 		public void run() {
-			conversation = username + " has connected \n";
-			messages.setText(conversation);
-
 			while (isRunning) {
 				Response response;
 				try {
 					response = (Response) ois.readObject();
 					if (response.getCode() == ResponseCode.USERS_LIST_SENT) {
-						Vector<String> users = response.getUserList();
-						for(String user : users){
-							FriendsList.this.listmodel.addElement(user);
-						}
+						processUpdateUserList(response);
+					}else if (response.getCode() == ResponseCode.NEW_USER_CONNECTED) {
+						processNewUserConnected(response);
 					}else if (response.getCode() == ResponseCode.NEW_MESSAGE) {
-						conversation = conversation + response.getName() + ": " + response.getMessage() + "\n";
-						messages.setText(conversation);
+						processNewMessageRecieved(response);
 					} else if (response.getCode() == ResponseCode.USER_DISCONNECTED) {
-						conversation = conversation + response.getName() + " has disconnected." + "\n";
-						messages.setText(conversation);
+						processUserDisconnected(response);
 					}
 				} catch (ClassNotFoundException | IOException e) {
+					isRunning = false;
 					e.printStackTrace();
 				}
+			}
+		}
+
+		private void processUserDisconnected(Response response) {
+			chatwindow.updateConversation(response.getName(), " has disconnected.");
+			if(FriendsList.this.listmodel.contains(response.getName()))
+				FriendsList.this.listmodel.removeElement(response.getName());
+		}
+
+		private void processNewMessageRecieved(Response response) {
+			if(!chatwindow.isVisible())
+				chatwindow.setVisible(true);
+			chatwindow.updateConversation(response.getName(), ": " + response.getMessage());
+		}
+
+		private void processNewUserConnected(Response response) {
+			FriendsList.this.listmodel.addElement(response.getName());
+		}
+
+		private void processUpdateUserList(Response response) {
+			Vector<String> users = response.getUserList();
+			for(String user : users){
+				if(!FriendsList.this.listmodel.contains(user))
+					FriendsList.this.listmodel.addElement(user);
 			}
 		}
 	}
