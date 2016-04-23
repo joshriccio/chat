@@ -12,11 +12,11 @@ import java.net.Socket;
 import javax.swing.JFrame;
 import javax.swing.JTextPane;
 
-import Network.Request;
-import Network.RequestCode;
-import Network.Response;
-import Network.ResponseCode;
-import Network.Server;
+import network.Request;
+import network.RequestCode;
+import network.Response;
+import network.ResponseCode;
+import network.Server;
 
 public class ChatWindow extends JFrame{
 	private static final long serialVersionUID = 5875046651800072284L;
