@@ -59,6 +59,14 @@ public class Request implements Serializable {
 		this.code = code;
 	}
 
+	/**
+	 * Constructor to add user to request
+	 * 
+	 * @param code
+	 *            RequestCode enum
+	 * @param user
+	 *            the user
+	 */
 	public Request(RequestCode code, User user) {
 		this.code = code;
 		this.user = user;

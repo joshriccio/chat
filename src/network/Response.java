@@ -46,7 +46,7 @@ public class Response implements Serializable {
 		this.code = code;
 		this.name = name;
 	}
-	
+
 	/**
 	 * Constructor to create a response with a code.
 	 * 
@@ -103,10 +103,21 @@ public class Response implements Serializable {
 		return this.userslist;
 	}
 
+	/**
+	 * Gets the salt from the request
+	 * 
+	 * @return the salt
+	 */
 	public String getSalt() {
 		return this.salt;
 	}
-	
+
+	/**
+	 * Sets the requests salt
+	 * 
+	 * @param salt
+	 *            the salt value
+	 */
 	public void setSalt(String salt) {
 		this.salt = salt;
 	}
