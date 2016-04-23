@@ -37,7 +37,7 @@ import network.Server;
  * @author Joshua Riccio
  *
  */
-public class FriendsList extends JFrame {
+public class SideBar extends JFrame {
 
 	private static final long serialVersionUID = -2585106853637231791L;
 	private Socket socket;
@@ -52,7 +52,7 @@ public class FriendsList extends JFrame {
 	/**
 	 * Constructor for FriendsList
 	 */
-	public FriendsList() {
+	public SideBar() {
 		setupLogin();
 	}
 
@@ -89,9 +89,9 @@ public class FriendsList extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				FriendsList.this.remove(userlabel);
-				FriendsList.this.remove(usernamefield);
-				FriendsList.this.remove(loginbtn);
+				SideBar.this.remove(userlabel);
+				SideBar.this.remove(usernamefield);
+				SideBar.this.remove(loginbtn);
 				setupWindow(usernamefield.getText());
 				connectToServer();
 				setupChatService();
@@ -246,8 +246,8 @@ public class FriendsList extends JFrame {
 
 		private void processUserDisconnected(Response response) {
 			chatwindow.updateConversation(response.getName(), " has disconnected.");
-			if (FriendsList.this.listmodel.contains(response.getName()))
-				FriendsList.this.listmodel.removeElement(response.getName());
+			if (SideBar.this.listmodel.contains(response.getName()))
+				SideBar.this.listmodel.removeElement(response.getName());
 		}
 
 		private void processNewMessageRecieved(Response response) {
@@ -257,14 +257,14 @@ public class FriendsList extends JFrame {
 		}
 
 		private void processNewUserConnected(Response response) {
-			FriendsList.this.listmodel.addElement(response.getName());
+			SideBar.this.listmodel.addElement(response.getName());
 		}
 
 		private void processUpdateUserList(Response response) {
 			Vector<String> users = response.getUserList();
 			for (String user : users) {
-				if (!FriendsList.this.listmodel.contains(user))
-					FriendsList.this.listmodel.addElement(user);
+				if (!SideBar.this.listmodel.contains(user))
+					SideBar.this.listmodel.addElement(user);
 			}
 		}
 	}
