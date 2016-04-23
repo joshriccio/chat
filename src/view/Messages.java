@@ -23,7 +23,7 @@ public class Messages extends JPanel{
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		this.add(this.scrollpane, BorderLayout.CENTER);
 		
-		this.messages.setText("What is your name? (Use ctrl+enter to send)");
+		this.messages.setText("What is your name?");
 	}
 	
 	public void setText(String text){

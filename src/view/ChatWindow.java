@@ -45,7 +45,7 @@ public class ChatWindow extends JFrame{
 	}
 
 	private void connectToServer() {
-		this.name = textarea.getMessage();
+		this.name = textarea.getMessage().substring(0, textarea.getMessage().length()-2);
 		Request request = new Request(RequestCode.CONNECT, this.name);
 		try {
 			socket = new Socket(Server.ADDRESS, Server.PORT_NUMBER);
@@ -68,13 +68,21 @@ public class ChatWindow extends JFrame{
 			private boolean firstmessage = true;
 			@Override
 			public void keyPressed(KeyEvent event) {
-				if(event.isControlDown() && event.getKeyCode() == KeyEvent.VK_ENTER){
+			}
+
+			@Override
+			public void keyReleased(KeyEvent event) {
+				if(event.getKeyCode() == KeyEvent.VK_ENTER){
 					if(firstmessage){
 						connectToServer();
 						textarea.clearText();
 						firstmessage = false;
 					}else{
-						Request request = new Request(RequestCode.SEND_MESSAGE, name, textarea.getMessage());
+						String message = "";
+						if(textarea.getMessage().length() > 1){
+							message = textarea.getMessage().substring(0, textarea.getMessage().length()-2);
+						}
+						Request request = new Request(RequestCode.SEND_MESSAGE, name, message);
 						textarea.clearText();
 						try {
 							oos.writeObject(request);
@@ -83,10 +91,6 @@ public class ChatWindow extends JFrame{
 						}
 					}
 				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent event) {
 			}
 
 			@Override
