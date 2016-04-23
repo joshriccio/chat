@@ -1,8 +1,10 @@
 package model;
 
+import java.io.Serializable;
+
 import network.Password;
 
-public class User {
+public class User implements Serializable{
 	
 	private String username;
 	private String password;
@@ -10,9 +12,9 @@ public class User {
 	boolean online;
 	
 	public User(String username, String password){
+		this.salt = Password.generateSaltValue();
 		this.username = username;
-		this.password = password;
-		this.salt = Password.generateSaltValue();	
+		this.password = Password.generateSecurePassword(password, this.salt);	
 	}
 	
 	public String getUsername(){

@@ -27,6 +27,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import model.User;
+import network.Password;
 import network.Request;
 import network.RequestCode;
 import network.Response;
@@ -108,9 +110,13 @@ public class SideBar extends JFrame {
 				SideBar.this.remove(passlabel);
 				SideBar.this.remove(passfield);
 				SideBar.this.remove(newaccount);
-				setupWindow(usernamefield.getText());
-				connectToServer();
-				setupChatService();
+				if(connectToServer(usernamefield.getText(), passfield.getText())){
+					setupWindow(usernamefield.getText());
+					setupChatService();
+				}else {
+					JOptionPane.showMessageDialog(null, "Authenication Failed");
+					setupLogin();
+				}
 			}
 		});
 
@@ -141,15 +147,19 @@ public class SideBar extends JFrame {
 				create.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
-						JOptionPane.showMessageDialog(null, "Account Created");
-						SideBar.this.remove(confirmpass);
-						SideBar.this.remove(confirmpassfield);
-						SideBar.this.remove(create);
-						SideBar.this.remove(userlabel);
-						SideBar.this.remove(usernamefield);
-						SideBar.this.remove(passlabel);
-						SideBar.this.remove(passfield);
-						setupLogin();
+						if(generateNewAccount(new User(usernamefield.getText(), confirmpassfield.getText()))){
+							JOptionPane.showMessageDialog(null, "Account Created");
+							SideBar.this.remove(confirmpass);
+							SideBar.this.remove(confirmpassfield);
+							SideBar.this.remove(create);
+							SideBar.this.remove(userlabel);
+							SideBar.this.remove(usernamefield);
+							SideBar.this.remove(passlabel);
+							SideBar.this.remove(passfield);
+							setupLogin();
+						}else{
+							JOptionPane.showMessageDialog(null, "Account already exists, please try again.");
+						}
 					}
 				});
 			}
@@ -171,13 +181,9 @@ public class SideBar extends JFrame {
 			}
 		});
 	}
-
-	private void setupChatService() {
-		this.chatwindow = new ChatWindow(this.username, this.oos);
-	}
-
-	private void connectToServer() {
-		Request request = new Request(RequestCode.CONNECT, this.username);
+	
+	private boolean generateNewAccount(User user) {
+		Request request = new Request(RequestCode.NEW_ACCOUNT, user);
 		try {
 			socket = new Socket(Server.ADDRESS, Server.PORT_NUMBER);
 			oos = new ObjectOutputStream(socket.getOutputStream());
@@ -185,15 +191,48 @@ public class SideBar extends JFrame {
 			oos.writeObject(request);
 			Response response = (Response) ois.readObject();
 			if (response.getCode() == ResponseCode.SUCCESS) {
-				ServerListener serverlistener = new ServerListener();
-				serverlistener.start();
-				request = new Request(RequestCode.REQUEST_USERS_ONLINE);
-				oos.writeObject(request);
+				return true;
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		return false;
+	}
 
+	private void setupChatService() {
+		this.chatwindow = new ChatWindow(this.username, this.oos);
+	}
+
+	private boolean connectToServer(String username, String pass) {
+		Request request = new Request(RequestCode.GET_SALT, username);
+		try {
+			socket = new Socket(Server.ADDRESS, Server.PORT_NUMBER);
+			ObjectOutputStream saltrequest = new ObjectOutputStream(socket.getOutputStream());
+			ObjectInputStream saltresponse = new ObjectInputStream(socket.getInputStream());
+			saltrequest.writeObject(request);
+			Response response = (Response) saltresponse.readObject();
+			saltrequest.close();
+			saltresponse.close();
+			socket.close();
+			if (response.getCode() == ResponseCode.SUCCESS) {
+				socket = new Socket(Server.ADDRESS, Server.PORT_NUMBER);
+				oos = new ObjectOutputStream(socket.getOutputStream());
+				ois = new ObjectInputStream(socket.getInputStream());
+				request = new Request(RequestCode.CONNECT, username, Password.generateSecurePassword(pass, response.getSalt()));
+				oos.writeObject(request);
+				response = (Response)ois.readObject();
+				if (response.getCode() == ResponseCode.SUCCESS) {				
+					ServerListener serverlistener = new ServerListener();
+					serverlistener.start();
+					request = new Request(RequestCode.REQUEST_USERS_ONLINE);
+					oos.writeObject(request);
+					return true;
+				}
+			}					
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	private void setupWindow(String username) {

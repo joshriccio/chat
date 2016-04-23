@@ -2,6 +2,8 @@ package network;
 
 import java.io.Serializable;
 
+import model.User;
+
 /**
  * Request utilizes the command design pattern to wrap meta-data into a
  * serializable class that sends a message from the chat client to the server.
@@ -15,6 +17,7 @@ public class Request implements Serializable {
 	private RequestCode code;
 	private String name;
 	private String message;
+	private User user;
 
 	/**
 	 * Constructor to create a request with a code, and a users name.
@@ -56,6 +59,11 @@ public class Request implements Serializable {
 		this.code = code;
 	}
 
+	public Request(RequestCode code, User user) {
+		this.code = code;
+		this.user = user;
+	}
+
 	/**
 	 * Gets the requests code
 	 * 
@@ -81,6 +89,13 @@ public class Request implements Serializable {
 	 */
 	public String getMessage() {
 		return this.message;
+	}
+
+	/**
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
 	}
 
 }

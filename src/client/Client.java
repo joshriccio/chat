@@ -1,7 +1,9 @@
-package view;
+package client;
 
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+
+import view.SideBar;
 
 /**
  * The main method for the client

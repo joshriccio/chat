@@ -17,6 +17,7 @@ public class Response implements Serializable {
 	private String message;
 	private ResponseCode code;
 	private Vector<String> userslist;
+	private String salt;
 
 	/**
 	 * Constructor to create a response with a code, and a users name, and a
@@ -44,6 +45,16 @@ public class Response implements Serializable {
 	public Response(ResponseCode code, String name) {
 		this.code = code;
 		this.name = name;
+	}
+	
+	/**
+	 * Constructor to create a response with a code.
+	 * 
+	 * @param code
+	 *            ResponseCode enum
+	 */
+	public Response(ResponseCode code) {
+		this.code = code;
 	}
 
 	/**
@@ -90,5 +101,13 @@ public class Response implements Serializable {
 	 */
 	public Vector<String> getUserList() {
 		return this.userslist;
+	}
+
+	public String getSalt() {
+		return this.salt;
+	}
+	
+	public void setSalt(String salt) {
+		this.salt = salt;
 	}
 }
