@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Vector;
 
+import model.User;
+
 /**
  * The server that processes requests from the chat client and returns
  * responses.
@@ -20,8 +22,10 @@ public class Server {
 	public static final int PORT_NUMBER = 4001;
 	private static ServerSocket serverSocket;
 	private static Socket socket;
-	static HashMap<String, ObjectOutputStream> usersmap;
-	static Vector<String> userslist;
+	static HashMap<String, ObjectOutputStream> userStreamMap;
+	static HashMap<String, User> userNameMap;
+	static Vector<String> onlinelist;
+	private static Vector<User> userlist;
 
 	/**
 	 * The main method of the server
@@ -31,8 +35,10 @@ public class Server {
 	 */
 	public static void main(String[] args) {
 		System.out.println("Server: server initialized");
-		usersmap = new HashMap<>();
-		userslist = new Vector<String>();
+		userStreamMap = new HashMap<>();
+		userNameMap = new HashMap<>();
+		userlist = new Vector<User>();
+		onlinelist = new Vector<String>();
 		boolean isRunning = true;
 		serverSocket = null;
 		ObjectInputStream ois = null;
@@ -45,24 +51,66 @@ public class Server {
 				ois = new ObjectInputStream(socket.getInputStream());
 				oos = new ObjectOutputStream(socket.getOutputStream());
 				Request request = (Request) ois.readObject();
-
-				if (request.getCode() == RequestCode.CONNECT) {
-					try {
-						Response response = new Response(ResponseCode.SUCCESS, null, null);
-						oos.writeObject(response);
-						usersmap.put(request.getName(), oos);
-						userslist.addElement(request.getName());
-						ClientHandler clienthandler = new ClientHandler(ois, request);
-						clienthandler.start();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+				if (request.getCode() == RequestCode.GET_SALT) {
+					processSaltRequest(oos, request);
+				} else if (request.getCode() == RequestCode.CONNECT) {
+					processNewConnection(ois, oos, request);
+				} else if (request.getCode() == RequestCode.NEW_ACCOUNT) {
+					processNewAccount(oos, request);
 				}
 
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 			isRunning = false;
+		}
+	}
+
+	private static void processSaltRequest(ObjectOutputStream oos, Request request) {
+		if (userNameMap.containsKey(request.getName())) {
+			try {
+				Response response = new Response(ResponseCode.SUCCESS);
+				response.setSalt(userNameMap.get(request.getName()).getSalt());
+				oos.writeObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private static void processNewAccount(ObjectOutputStream oos, Request request) {
+		if (!userlist.contains(request.getUser().getUsername())) {
+			try {
+				Response response = new Response(ResponseCode.SUCCESS);
+				userlist.addElement(request.getUser());
+				userNameMap.put(request.getUser().getUsername(), request.getUser());
+				oos.writeObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				Response response = new Response(ResponseCode.FAILED, null, null);
+				oos.writeObject(response);
+				oos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private static void processNewConnection(ObjectInputStream ois, ObjectOutputStream oos, Request request) {
+		try {
+			if (userNameMap.get(request.getName()).authenticatePassword(request.getMessage())) {
+				Response response = new Response(ResponseCode.SUCCESS, null, null);
+				oos.writeObject(response);
+				userStreamMap.put(request.getName(), oos);
+				onlinelist.addElement(request.getName());
+				ClientHandler clienthandler = new ClientHandler(ois, request);
+				clienthandler.start();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
@@ -101,6 +149,8 @@ class ClientHandler extends Thread {
 				Request request = (Request) ois.readObject();
 				if (request.getCode() == RequestCode.SEND_MESSAGE) {
 					sendMessageToClients(request.getMessage());
+				} else if (request.getCode() == RequestCode.REQUEST_USERS_ONLINE) {
+					sendUsersList();
 				} else if (request.getCode() == RequestCode.EXITING) {
 					closeConnection();
 				}
@@ -111,39 +161,60 @@ class ClientHandler extends Thread {
 		}
 	}
 
-	private void initialConnection() {
-		System.out.println("Server: " + this.name + " has connected");
-		Response response = new Response(ResponseCode.NEW_MESSAGE, this.name, " Now connected.");
-		for (String user : Server.userslist) {
+	private void sendUsersList() {
+		synchronized (Server.onlinelist) {
+			Response response = new Response(ResponseCode.USERS_LIST_SENT, this.name);
+			response.addUserList(Server.onlinelist);
 			try {
-				Server.usersmap.get(user).writeObject(response);
+				Server.userStreamMap.get(this.name).writeObject(response);
 			} catch (IOException e) {
 				e.printStackTrace();
+			}
+		}
+
+	}
+
+	private void initialConnection() {
+		synchronized (Server.onlinelist) {
+			System.out.println("Server: " + this.name + " has connected");
+			Response response = new Response(ResponseCode.NEW_USER_CONNECTED, this.name);
+			for (String user : Server.onlinelist) {
+				if (!user.equals(this.name)) {
+					try {
+						Server.userStreamMap.get(user).writeObject(response);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 	}
 
 	private void closeConnection() {
-		System.out.println("Server: " + this.name + " has disconnected");
-		Server.userslist.remove(this.name);
-		this.isRunning = false;
-		Response response = new Response(ResponseCode.USER_DISCONNECTED, this.name);
-		for (String user : Server.userslist) {
-			try {
-				Server.usersmap.get(user).writeObject(response);
-			} catch (IOException e) {
-				e.printStackTrace();
+		synchronized (Server.onlinelist) {
+			System.out.println("Server: " + this.name + " has disconnected");
+			Server.onlinelist.remove(this.name);
+			this.isRunning = false;
+			Response response = new Response(ResponseCode.USER_DISCONNECTED, this.name);
+			for (String user : Server.onlinelist) {
+				try {
+					Server.userStreamMap.get(user).writeObject(response);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 
 	private void sendMessageToClients(String message) {
-		Response response = new Response(ResponseCode.NEW_MESSAGE, this.name, message);
-		for (String user : Server.userslist) {
-			try {
-				Server.usersmap.get(user).writeObject(response);
-			} catch (IOException e) {
-				e.printStackTrace();
+		synchronized (Server.onlinelist) {
+			Response response = new Response(ResponseCode.NEW_MESSAGE, this.name, message);
+			for (String user : Server.onlinelist) {
+				try {
+					Server.userStreamMap.get(user).writeObject(response);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
