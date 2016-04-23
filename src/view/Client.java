@@ -9,7 +9,10 @@ package view;
 public class Client {
 
 	public static void main(String[] args) {
-		ChatWindow chat = new ChatWindow();
-		chat.setVisible(true);
+		FriendsList list = new FriendsList();
+		list.setVisible(true);
+		
+//		ChatWindow chat = new ChatWindow();
+//		chat.setVisible(true);
 	}
 }

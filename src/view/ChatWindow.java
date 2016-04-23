@@ -40,7 +40,7 @@ public class ChatWindow extends JFrame {
 	 * The chat window's constructor
 	 */
 	public ChatWindow() {
-		this.setTitle("Chat Server");
+		this.setTitle("Chat");
 		this.setSize(600, 400);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
