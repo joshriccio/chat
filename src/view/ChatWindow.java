@@ -37,6 +37,7 @@ public class ChatWindow extends JFrame {
 		this.setTitle("Chat");
 		this.setSize(600, 400);
 		this.setResizable(false);
+		this.setLocationRelativeTo(null);
 		this.oos = oos;
 		this.messages = new Messages();
 		this.conversation = new String();

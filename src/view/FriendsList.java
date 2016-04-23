@@ -3,6 +3,7 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -16,13 +17,16 @@ import java.net.Socket;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 
 import network.Request;
@@ -60,7 +64,11 @@ public class FriendsList extends JFrame {
 		this.setSize(400, 300);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setLayout(new FlowLayout());
+		this.setLayout(null);
+		this.setLocationRelativeTo(null);
+		
+		JLabel userlabel = new JLabel("Name");
+		this.add(userlabel);
 
 		JTextField usernamefield = new JTextField();
 		usernamefield.setPreferredSize(new Dimension(200, 25));
@@ -68,10 +76,23 @@ public class FriendsList extends JFrame {
 
 		JButton loginbtn = new JButton("Connect");
 		this.add(loginbtn);
+		
+		Insets insets = this.getInsets();
+		Dimension size = usernamefield.getPreferredSize();
+		usernamefield.setBounds(120 + insets.left, 100 + insets.top,
+	             size.width, size.height);
+		size = userlabel.getPreferredSize();
+		userlabel.setBounds(80 + insets.left, 100 + insets.top,
+	             size.width, size.height);
+		size = loginbtn.getPreferredSize();
+		loginbtn.setBounds(180 + insets.left, 155 + insets.top,
+	             size.width, size.height);
+
 		loginbtn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				FriendsList.this.remove(userlabel);
 				FriendsList.this.remove(usernamefield);
 				FriendsList.this.remove(loginbtn);
 				setupWindow(usernamefield.getText());
@@ -108,9 +129,9 @@ public class FriendsList extends JFrame {
 
 	private void setupWindow(String username) {
 		this.setTitle("Net Chat");
-		this.setSize(300, 700);
-		this.setResizable(false);
+		this.setSize(300, 630);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setLocation(30, 30);
 		this.username = username;
 		this.listmodel = new DefaultListModel<String>();
 		this.list = new JList<String>(listmodel);
