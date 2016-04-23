@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -63,7 +64,7 @@ public class SideBar extends JFrame {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLayout(null);
 		this.setLocationRelativeTo(null);
-		
+
 		JLabel userlabel = new JLabel("Name");
 		this.add(userlabel);
 
@@ -71,32 +72,103 @@ public class SideBar extends JFrame {
 		usernamefield.setPreferredSize(new Dimension(200, 25));
 		this.add(usernamefield);
 
+		JLabel passlabel = new JLabel("Password");
+		this.add(passlabel);
+
+		JTextField passfield = new JTextField();
+		passfield.setPreferredSize(new Dimension(200, 25));
+		this.add(passfield);
+
 		JButton loginbtn = new JButton("Connect");
 		this.add(loginbtn);
-		
+
+		JLabel newaccount = new JLabel("Create a new account");
+		this.add(newaccount);
+
 		Insets insets = this.getInsets();
 		Dimension size = usernamefield.getPreferredSize();
-		usernamefield.setBounds(120 + insets.left, 100 + insets.top,
-	             size.width, size.height);
+		usernamefield.setBounds(150 + insets.left, 50 + insets.top, size.width, size.height);
 		size = userlabel.getPreferredSize();
-		userlabel.setBounds(80 + insets.left, 100 + insets.top,
-	             size.width, size.height);
+		userlabel.setBounds(30 + insets.left, 50 + insets.top, size.width, size.height);
+		size = passfield.getPreferredSize();
+		passfield.setBounds(150 + insets.left, 80 + insets.top, size.width, size.height);
+		size = passlabel.getPreferredSize();
+		passlabel.setBounds(30 + insets.left, 80 + insets.top, size.width, size.height);
 		size = loginbtn.getPreferredSize();
-		loginbtn.setBounds(180 + insets.left, 155 + insets.top,
-	             size.width, size.height);
+		loginbtn.setBounds(170 + insets.left, 110 + insets.top, size.width, size.height);
+		size = newaccount.getPreferredSize();
+		newaccount.setBounds(150 + insets.left, 210 + insets.top, size.width, size.height);
 
 		loginbtn.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				SideBar.this.remove(userlabel);
 				SideBar.this.remove(usernamefield);
 				SideBar.this.remove(loginbtn);
+				SideBar.this.remove(passlabel);
+				SideBar.this.remove(passfield);
+				SideBar.this.remove(newaccount);
 				setupWindow(usernamefield.getText());
 				connectToServer();
 				setupChatService();
 			}
+		});
 
+		newaccount.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				SideBar.this.remove(newaccount);
+				SideBar.this.remove(loginbtn);
+				SideBar.this.setSize(400, 310);
+				JLabel confirmpass = new JLabel("Confirm Password");
+				SideBar.this.add(confirmpass);
+
+				JTextField confirmpassfield = new JTextField();
+				confirmpassfield.setPreferredSize(new Dimension(200, 25));
+				SideBar.this.add(confirmpassfield);
+
+				Insets insets = SideBar.this.getInsets();
+				Dimension size = usernamefield.getPreferredSize();
+				size = confirmpass.getPreferredSize();
+				confirmpass.setBounds(28 + insets.left, 100 + insets.top, size.width, size.height);
+				size = confirmpassfield.getPreferredSize();
+				confirmpassfield.setBounds(148 + insets.left, 100 + insets.top, size.width, size.height);
+
+				JButton create = new JButton("Create new account");
+				size = create.getPreferredSize();
+				create.setBounds(148 + insets.left, 140 + insets.top, size.width, size.height);
+				SideBar.this.add(create);
+				create.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						JOptionPane.showMessageDialog(null, "Account Created");
+						SideBar.this.remove(confirmpass);
+						SideBar.this.remove(confirmpassfield);
+						SideBar.this.remove(create);
+						SideBar.this.remove(userlabel);
+						SideBar.this.remove(usernamefield);
+						SideBar.this.remove(passlabel);
+						SideBar.this.remove(passfield);
+						setupLogin();
+					}
+				});
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+			}
 		});
 	}
 
