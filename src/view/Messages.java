@@ -8,13 +8,22 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
-public class Messages extends JPanel{
+/**
+ * The text pane that displays all the messages in the conversation
+ * 
+ * @author Joshua Riccio
+ *
+ */
+public class Messages extends JPanel {
 
 	private static final long serialVersionUID = 386111478676201121L;
 	JTextPane messages;
 	JScrollPane scrollpane;
-	
-	public Messages(){
+
+	/**
+	 * The constructor for the messages window
+	 */
+	public Messages() {
 		this.messages = new JTextPane();
 		this.messages.setEditable(false);
 		this.messages.setBackground(Color.white);
@@ -22,12 +31,18 @@ public class Messages extends JPanel{
 		this.scrollpane = new JScrollPane(this.messages, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		this.add(this.scrollpane, BorderLayout.CENTER);
-		
+
 		this.messages.setText("What is your name?");
 	}
-	
-	public void setText(String text){
+
+	/**
+	 * Sets the text for the message window
+	 * 
+	 * @param text
+	 *            the text to be added to the window
+	 */
+	public void setText(String text) {
 		this.messages.setText(text);
 	}
-	
+
 }
