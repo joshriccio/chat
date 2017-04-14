@@ -12,6 +12,7 @@ import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
 
@@ -113,7 +114,6 @@ public class SideBar extends JFrame {
 				SideBar.this.remove(newaccount);
 				if(connectToServer(usernamefield.getText(), String.valueOf(passfield.getPassword()))){
 					setupWindow(usernamefield.getText());
-					setupChatService();
 				}else {
 					JOptionPane.showMessageDialog(null, "Authenication Failed");
 					setupLogin();
@@ -215,6 +215,9 @@ public class SideBar extends JFrame {
 			saltrequest.close();
 			saltresponse.close();
 			socket.close();
+			if(response.getCode() == ResponseCode.FAILED){
+				return false;
+			}
 			if (response.getCode() == ResponseCode.SUCCESS) {
 				socket = new Socket(Server.ADDRESS, Server.PORT_NUMBER);
 				oos = new ObjectOutputStream(socket.getOutputStream());
@@ -222,7 +225,11 @@ public class SideBar extends JFrame {
 				request = new Request(RequestCode.CONNECT, username, Password.generateSecurePassword(pass, response.getSalt()));
 				oos.writeObject(request);
 				response = (Response)ois.readObject();
-				if (response.getCode() == ResponseCode.SUCCESS) {				
+				if (response.getCode() == ResponseCode.SUCCESS) {	
+					this.username = username;
+					setupChatService();
+					ChatListener chatListener = new ChatListener();
+					chatListener.start();
 					ServerListener serverlistener = new ServerListener();
 					serverlistener.start();
 					request = new Request(RequestCode.REQUEST_USERS_ONLINE);
@@ -241,7 +248,6 @@ public class SideBar extends JFrame {
 		this.setSize(300, 630);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocation(30, 30);
-		this.username = username;
 		this.listmodel = new DefaultListModel<String>();
 		this.list = new JList<String>(listmodel);
 		this.scrollpane = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -345,7 +351,7 @@ public class SideBar extends JFrame {
 					} else if (response.getCode() == ResponseCode.NEW_USER_CONNECTED) {
 						processNewUserConnected(response);
 					} else if (response.getCode() == ResponseCode.NEW_MESSAGE) {
-						processNewMessageRecieved(response);
+						//processNewMessageRecieved(response);
 					} else if (response.getCode() == ResponseCode.USER_DISCONNECTED) {
 						processUserDisconnected(response);
 					}
@@ -362,23 +368,54 @@ public class SideBar extends JFrame {
 				SideBar.this.listmodel.removeElement(response.getName());
 		}
 
-		private void processNewMessageRecieved(Response response) {
-			if (!chatwindow.isVisible())
-				chatwindow.setVisible(true);
-			chatwindow.updateConversation(response.getName(), ": " + response.getMessage());
-		}
+//		private void processNewMessageRecieved(Response response) {
+//			if (!chatwindow.isVisible())
+//				chatwindow.setVisible(true);
+//			chatwindow.updateConversation(response.getName(), ": " + response.getMessage());
+//		}
 
 		private void processNewUserConnected(Response response) {
 			SideBar.this.listmodel.addElement(response.getName());
+			chatwindow.addUser(new User(this.getName(),"localhost", User.PORT_NUMBER));
 		}
 
 		private void processUpdateUserList(Response response) {
-			Vector<String> users = response.getUserList();
-			for (String user : users) {
-				if (!SideBar.this.listmodel.contains(user))
-					SideBar.this.listmodel.addElement(user);
+			Vector<User> users = response.getUserList();
+			for (User user : users) {
+				System.out.println("User: " + user.getIp());
+				if (!SideBar.this.listmodel.contains(user.getUsername())){
+					SideBar.this.listmodel.addElement(user.getUsername());
+					chatwindow.addUser(user);
+				}
 			}
 		}
 	}
+	
+	private class ChatListener extends Thread {
+		public final int PORT_NUMBER = 6001;
+		private ServerSocket chatServerSocket;
+		private Socket chatSocket;
+		ObjectInputStream cois = null;
 
+		@Override
+		public void run() {
+			try{
+			chatServerSocket = new ServerSocket(PORT_NUMBER);
+			while (true) {
+				chatSocket = chatServerSocket.accept();
+				cois = new ObjectInputStream(chatSocket.getInputStream());
+				Request request = (Request) cois.readObject();
+				processNewMessageRecieved(request);
+			}
+			}catch(IOException | ClassNotFoundException e){
+				
+			}
+		}
+		
+		private void processNewMessageRecieved(Request request) {
+			if (!chatwindow.isVisible())
+				chatwindow.setVisible(true);
+			chatwindow.updateConversation(request.getName(), ": " + request.getMessage());
+		}
+	}
 }

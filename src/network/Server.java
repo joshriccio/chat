@@ -24,7 +24,7 @@ public class Server {
 	private static Socket socket;
 	static HashMap<String, ObjectOutputStream> userStreamMap;
 	static HashMap<String, User> userNameMap;
-	static Vector<String> onlinelist;
+	static Vector<User> onlinelist;
 	private static Vector<User> userlist;
 
 	/**
@@ -38,7 +38,7 @@ public class Server {
 		userStreamMap = new HashMap<>();
 		userNameMap = new HashMap<>();
 		userlist = new Vector<User>();
-		onlinelist = new Vector<String>();
+		onlinelist = new Vector<User>();
 		boolean isRunning = true;
 		serverSocket = null;
 		ObjectInputStream ois = null;
@@ -75,6 +75,13 @@ public class Server {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}else{
+			try {
+				Response response = new Response(ResponseCode.FAILED);
+				oos.writeObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -105,7 +112,7 @@ public class Server {
 				Response response = new Response(ResponseCode.SUCCESS, null, null);
 				oos.writeObject(response);
 				userStreamMap.put(request.getName(), oos);
-				onlinelist.addElement(request.getName());
+				onlinelist.addElement(new User(request.getName(), socket.getInetAddress().toString(), socket.getPort()));
 				ClientHandler clienthandler = new ClientHandler(ois, request);
 				clienthandler.start();
 			}
@@ -178,10 +185,10 @@ class ClientHandler extends Thread {
 		synchronized (Server.onlinelist) {
 			System.out.println("Server: " + this.name + " has connected");
 			Response response = new Response(ResponseCode.NEW_USER_CONNECTED, this.name);
-			for (String user : Server.onlinelist) {
-				if (!user.equals(this.name)) {
+			for (User user : Server.onlinelist) {
+				if (!user.getUsername().equals(this.name)) {
 					try {
-						Server.userStreamMap.get(user).writeObject(response);
+						Server.userStreamMap.get(user.getUsername()).writeObject(response);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -196,9 +203,9 @@ class ClientHandler extends Thread {
 			Server.onlinelist.remove(this.name);
 			this.isRunning = false;
 			Response response = new Response(ResponseCode.USER_DISCONNECTED, this.name);
-			for (String user : Server.onlinelist) {
+			for (User user : Server.onlinelist) {
 				try {
-					Server.userStreamMap.get(user).writeObject(response);
+					Server.userStreamMap.get(user.getUsername()).writeObject(response);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -209,9 +216,9 @@ class ClientHandler extends Thread {
 	private void sendMessageToClients(String message) {
 		synchronized (Server.onlinelist) {
 			Response response = new Response(ResponseCode.NEW_MESSAGE, this.name, message);
-			for (String user : Server.onlinelist) {
+			for (User user : Server.onlinelist) {
 				try {
-					Server.userStreamMap.get(user).writeObject(response);
+					Server.userStreamMap.get(user.getUsername()).writeObject(response);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

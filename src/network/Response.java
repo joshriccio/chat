@@ -3,6 +3,8 @@ package network;
 import java.io.Serializable;
 import java.util.Vector;
 
+import model.User;
+
 /**
  * Response utilizes the command design pattern to wrap meta-data into a
  * serializable class that sends a message from the server to the client.
@@ -12,11 +14,11 @@ import java.util.Vector;
  */
 public class Response implements Serializable {
 
-	private static final long serialVersionUID = 7044358694627183903L;
+	private static final long serialVersionUID = 280307447949100811L;
 	private String name;
 	private String message;
 	private ResponseCode code;
-	private Vector<String> userslist;
+	private Vector<User> userslist;
 	private String salt;
 
 	/**
@@ -90,7 +92,7 @@ public class Response implements Serializable {
 	 * @param userslist
 	 *            the list of users online
 	 */
-	public void addUserList(Vector<String> userslist) {
+	public void addUserList(Vector<User> userslist) {
 		this.userslist = userslist;
 	}
 
@@ -99,7 +101,7 @@ public class Response implements Serializable {
 	 * 
 	 * @return the user list from this response
 	 */
-	public Vector<String> getUserList() {
+	public Vector<User> getUserList() {
 		return this.userslist;
 	}
 

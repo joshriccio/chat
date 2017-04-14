@@ -1,5 +1,6 @@
 package model;
 
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import network.Password;
@@ -13,10 +14,13 @@ import network.Password;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 4723737477026081669L;
+	public static final int PORT_NUMBER = 6001;
 	private String username;
 	private String password;
 	private String salt;
 	boolean online;
+	private String ip;
+	private int port;
 
 	/**
 	 * The User constructor
@@ -30,6 +34,12 @@ public class User implements Serializable {
 		this.salt = Password.generateSaltValue();
 		this.username = username;
 		this.password = Password.generateSecurePassword(password, this.salt);
+	}
+
+	public User(String name, String ip, int port) {
+		this.username = name;
+		this.setIp(ip);
+		this.setPort(port);
 	}
 
 	/**
@@ -62,5 +72,21 @@ public class User implements Serializable {
 			return true;
 		else
 			return false;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
 	}
 }

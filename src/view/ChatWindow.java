@@ -5,11 +5,16 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.Vector;
+
 import javax.swing.JFrame;
 import javax.swing.JTextPane;
 
+import model.User;
 import network.Request;
 import network.RequestCode;
+import network.Server;
 
 /**
  * The main user interface for the chat client
@@ -20,11 +25,13 @@ import network.RequestCode;
 public class ChatWindow extends JFrame {
 	private static final long serialVersionUID = 5875046651800072284L;
 	private ObjectOutputStream oos;
+	private Socket socket;
 	private Messages messages;
 	private TextArea textarea;
 	private JTextPane textpane;
 	private String conversation;
 	private String name;
+	Vector<User> usersInChat;
 
 	/**
 	 * The chat window's constructor
@@ -38,7 +45,6 @@ public class ChatWindow extends JFrame {
 		this.setSize(600, 400);
 		this.setResizable(false);
 		this.setLocationRelativeTo(null);
-		this.oos = oos;
 		this.messages = new Messages();
 		this.conversation = new String();
 		this.name = username;
@@ -47,6 +53,7 @@ public class ChatWindow extends JFrame {
 		this.textarea = new TextArea(textpane);
 		this.add(messages, BorderLayout.CENTER);
 		this.add(textarea, BorderLayout.SOUTH);
+		usersInChat = new Vector<User>();
 	}
 
 	private void setListeners() {
@@ -66,7 +73,11 @@ public class ChatWindow extends JFrame {
 					Request request = new Request(RequestCode.SEND_MESSAGE, name, message);
 					textarea.clearText();
 					try {
-						oos.writeObject(request);
+						for(User user : usersInChat){
+							socket = new Socket(user.getIp().substring(1), User.PORT_NUMBER);
+							oos = new ObjectOutputStream(socket.getOutputStream());
+							oos.writeObject(request);
+						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -82,5 +93,9 @@ public class ChatWindow extends JFrame {
 	public void updateConversation(String name, String message) {
 		conversation = conversation + name + message + "\n";
 		messages.setText(conversation);
+	}
+
+	public void addUser(User user) {
+		usersInChat.addElement(user);
 	}
 }
